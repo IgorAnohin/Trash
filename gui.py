@@ -166,19 +166,24 @@ GREETING_VERY_OLD = (
 )
 
 MORE_CALLS = (
-    '\nwhat about up your phone calls? ',
+    '\nВы перешли границы дозволенного, ваша тяга к голосовому общению бесконечна.\n',
+    '\nВсегда важно поддерживать голосовую связь с людьми. Вы поддерживаете ее активно, а мы хотим Вам помочь!\n',
+
 )
 
 MORE_SMSs = (
-    '\nwhat about up your phone sms? ',
+    '\nНаши голуби устали доставлять Ваши письма, специально для Вас мы расширяем голубятню.\n',
+    # '\n'
 )
 
 MORE_INTERNET = (
-    '\nwhat about more INTERNET? ',
+    '\nВаша тяга к знаниям похвальна и мы хотим поддержать эти начинания.\n',
+    # '\nЕсл
+
 )
 
 NEUTRAL_MESSAGE = (
-    '\nHAVE a GOOD day ',
+    '\nЖелаем хорошего дня. А мы тут новый тариф выпустили...\n',
 )
 
 TARIF = (
@@ -226,9 +231,13 @@ FAT_TEXT = 'VPN был классным!!!!'
 
 MAIN_BIG_OFFER = '\nКаждый из нас склонен выбирать как жить, как думать, что выбирать... ' \
              'но иногда в переломные моменты нам требуется помощь. ' \
-             'Мегафон заботится о каждом из клиентов и вашему вниманию предлагается тариф %s мы любим Вас, Ваш Мегафон'
+             'Мегафон заботится о каждом из клиентов и вашему вниманию предлагается тариф: ' \
+                 '200 минут, 30 Гб Интернета и 200 SMS.' \
+                 ' Мы любим Вас, Ваш Мегафон'
 
-MAIN_MIN_OFFER = '\nМегафон заботится о каждом из клиентов и вашему вниманию предлагается тариф %s мы любим Вас, Ваш Мегафон'
+MAIN_MIN_OFFER = '\nМегафон заботится о каждом из клиентов и вашему вниманию предлагается тариф' \
+                ' 200 минут, 30 Гб Интернета и 200 SMS.' \
+                 'Мы любим Вас, Ваш Мегафон'
 
 def get_messenger(messanger):
     global message
@@ -286,32 +295,30 @@ def get_age(age, male):
 
 def parse_attr(calls, SMS, Internet, tarif):
     message = ''
-    SS = check_out_tarif(calls, tarif[0], 1) + check_out_tarif(SMS, tarif[1], 3) + check_out_tarif(Internet, tarif[2],
-                                                                                                   5)
+    SS = check_out_tarif(calls, tarif[0], 1) + check_out_tarif(SMS, int(tarif[2]), 3) + check_out_tarif(Internet, int(tarif[1]), 5)
     if SS == 1:
         message += MORE_CALLS[random.randrange(len(MORE_CALLS))]
-
     elif SS == 3:
         message += MORE_SMSs[random.randrange(len(MORE_SMSs))]
     elif SS == 4:
-        message += " calls and messages"
+        message += "Звонки и сообщения"
     elif SS == 5:
         message += MORE_INTERNET[random.randrange(len(MORE_INTERNET))]
     elif SS == 8:
-        message += " messages and internet"
+        message += "Сообщения и интернет"
     elif SS == 6:
-        message += " inet calls"
+        message += "Интернет и звонки"
     elif SS == 9:
-        message += "all"
+        message += "Кажется, этот тариф Вам не подходит"
     else:
         message += NEUTRAL_MESSAGE[random.randrange(len(NEUTRAL_MESSAGE))]
 
     return message
 
 def check_out_tarif(values, tarif_val, inc):
-    global message
+    #global message
     for value in values:
-        if value > tarif_val:
+        if int(value) > int(tarif_val):
             return inc
     return 0
 
