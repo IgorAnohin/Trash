@@ -330,7 +330,8 @@ class Example(QtWidgets.QWidget):
         form = QtWidgets.QFormLayout()
         self.text.setReadOnly(True)
         main_container = QtWidgets.QHBoxLayout()
-
+        self.comboBox = QtWidgets.QComboBox()
+        self.comboBox.addItem("Выберите тариф:")
         gender_age = QtWidgets.QHBoxLayout()
         self.genderBox.addItem("M")
         self.genderBox.addItem("F")
@@ -343,7 +344,7 @@ class Example(QtWidgets.QWidget):
         self.comboBox.activated.connect(lambda: self.choose_tarif_listener())
         form.addRow('Plan', self.comboBox)
 
-        arr = ['Calls', 'SMS', 'Internet', 'Tarif']
+        arr = ['Calls', 'SMS', 'Internet']
         for i in range(len(arr)):
             line = QtWidgets.QLineEdit()
             # line.setPlaceholderText('tarif: %s' % str(self.get_real_tarif()))
@@ -363,10 +364,6 @@ class Example(QtWidgets.QWidget):
         buttonGroup = QtWidgets.QGroupBox()
         buttonGroup.setLayout(buttons)
         form.addRow('Location', buttonGroup)
-
-        self.comboBox = QtWidgets.QComboBox()
-        self.comboBox.addItem("Выберите тариф:")
-
 
 
         form.addRow("result", self.text)
@@ -395,9 +392,12 @@ class Example(QtWidgets.QWidget):
         calls = self.lines['Calls'].text().split(',')
         sms = self.lines['SMS'].text().split(',')
         inet = self.lines['Internet'].text().split(',')
-        tarif = self.lines['Tarif'].text().split(',')
+        #tarif = self.lines['Tarif'].text().split(',')
         age_format = get_age(int(age), gender)
-        parse_attr(calls, sms, inet, tarif)
+
+        tarif = self.get_real_tarif()
+        tarif_list = [str(tarif[1]), str(tarif[2]), str(tarif[3]) if len(tarif) == 4 else '99999']
+        parse_attr(calls, sms, inet, tarif_list)
         self.text.setText(get_dop_info() + '\n' + message)
         message = ''
 
@@ -424,7 +424,7 @@ class Example(QtWidgets.QWidget):
         tarif = self.get_real_tarif();
         self.lines['Calls'].setPlaceholderText('tarif: %s min' % str(tarif[1]))
         self.lines['Internet'].setPlaceholderText('tarif: %s Gb' % str(tarif[2]))
-        self.lines['SMS'].setPlaceholderText('tarif: %s sms' % str(tarif[3]) if len(tarif) == 4 else '--')
+        self.lines['SMS'].setPlaceholderText('tarif: %s sms' % str(tarif[3]) if len(tarif) == 4 else '99999')
 
     def create_slider_box(self, type_label, label_text, min, max, now):
         box = QtWidgets.QHBoxLayout()
