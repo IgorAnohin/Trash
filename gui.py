@@ -19,6 +19,11 @@ class messengers(Enum):
     VIBER = 3;
     FACEBOOK_MESSENGER = 4;
 
+class Canals(Enum):
+    MESSENGER = 1,
+    SMS = 2,
+    PUSH = 3,
+    LK = 4
 
 
 message = ""
@@ -161,19 +166,19 @@ GREETING_VERY_OLD = (
 )
 
 MORE_CALLS = (
-    'what about up your phone calls? ',
+    '\nwhat about up your phone calls? ',
 )
 
 MORE_SMSs = (
-    'what about up your phone sms? ',
+    '\nwhat about up your phone sms? ',
 )
 
 MORE_INTERNET = (
-    'what about more INTERNET? ',
+    '\nwhat about more INTERNET? ',
 )
 
 NEUTRAL_MESSAGE = (
-    "HAVE a GOOD day "
+    '\nHAVE a GOOD day ',
 )
 
 TARIF = (
@@ -219,7 +224,11 @@ FACEBOOKMESSENGER = {
 
 FAT_TEXT = 'VPN был классным!!!!'
 
+MAIN_BIG_OFFER = '\nКаждый из нас склонен выбирать как жить, как думать, что выбирать... ' \
+             'но иногда в переломные моменты нам требуется помощь. ' \
+             'Мегафон заботится о каждом из клиентов и вашему вниманию предлагается тариф %s мы любим Вас, Ваш Мегафон'
 
+MAIN_MIN_OFFER = '\nМегафон заботится о каждом из клиентов и вашему вниманию предлагается тариф %s мы любим Вас, Ваш Мегафон'
 
 def get_messenger(messanger):
     global message
@@ -239,9 +248,6 @@ def get_messenger(messanger):
         message += NEUTRAL_MESSAGE[random.randrange(len(NEUTRAL_MESSAGE))]
 
 
-
-
-
 def get_dop_info():
     global FAT_TEXT
     for key in d.keys():
@@ -254,7 +260,7 @@ def get_dop_info():
 
 
 def get_age(age, male):
-    global message
+    message = ''
     if (17 >= age):
         message += 'Слишком молодой, чтобы что-либо получать'
     elif (18 <= age <= 27):
@@ -262,23 +268,29 @@ def get_age(age, male):
             message += GREETING_MAN[random.randrange(len(GREETING_MAN))]
         else:
             message += GREETING_WOMAN[random.randrange(len(GREETING_WOMAN))]
-        return Ages.STUDENT
+        CANALS = ['Messengers', 'LK', 'mob']
+
+        #return Ages.STUDENT
     elif (27 < age <= 45):
         message += GREETIN_MIDDLE[random.randrange(len(GREETIN_MIDDLE))]
-        return Ages.MIDDLE_PERSON
-    elif (45 < age <= 60):
+        CANALS = ['Messengers', 'SMS', 'LK', 'mob']
+        #return Ages.MIDDLE_PERSON
+    elif (45 < age <= 100):
         message += GREETING_VERY_OLD[random.randrange(len(GREETING_VERY_OLD))]
-        return Ages.OLD_PERSON
-    else:
-        return Ages.VERY_OLD_PERSON
+        CANALS = ['Messengers', 'SMS', 'LK', 'mob']
+        #return Ages.OLD_PERSON
+    #else:
+        CANALS = ['Messengers', 'LK', 'mob']
+    return message
 
 
 def parse_attr(calls, SMS, Internet, tarif):
-    global message
+    message = ''
     SS = check_out_tarif(calls, tarif[0], 1) + check_out_tarif(SMS, tarif[1], 3) + check_out_tarif(Internet, tarif[2],
                                                                                                    5)
     if SS == 1:
         message += MORE_CALLS[random.randrange(len(MORE_CALLS))]
+
     elif SS == 3:
         message += MORE_SMSs[random.randrange(len(MORE_SMSs))]
     elif SS == 4:
@@ -288,12 +300,13 @@ def parse_attr(calls, SMS, Internet, tarif):
     elif SS == 8:
         message += " messages and internet"
     elif SS == 6:
-        message += " "
+        message += " inet calls"
     elif SS == 9:
-        message += "смените тариф."
+        message += "all"
     else:
         message += NEUTRAL_MESSAGE[random.randrange(len(NEUTRAL_MESSAGE))]
 
+    return message
 
 def check_out_tarif(values, tarif_val, inc):
     global message
@@ -326,7 +339,7 @@ class Example(QtWidgets.QWidget):
         self.window()
 
     def window(self):
-        self.setGeometry(100, 50, 600, 100)
+        self.setGeometry(100, 50, 800, 500)
         form = QtWidgets.QFormLayout()
         self.text.setReadOnly(True)
         main_container = QtWidgets.QHBoxLayout()
@@ -353,7 +366,7 @@ class Example(QtWidgets.QWidget):
 
         form.addRow('Messengers', self.create_slider_box('messenger', '50', 0, 100, 50))
         form.addRow('Profile', self.create_slider_box('profile', '50', 0, 100, 50))
-        form.addRow('???', self.create_slider_box('???', '50', 0, 100, 50))
+        form.addRow('mobApp', self.create_slider_box('mob', '50', 0, 100, 50))
 
         buttons = QtWidgets.QHBoxLayout()
         self.usual.setChecked(True)
@@ -366,15 +379,17 @@ class Example(QtWidgets.QWidget):
         form.addRow('Location', buttonGroup)
 
 
-        form.addRow("result", self.text)
-
         okButton = QtWidgets.QPushButton("OK")
         okButton.clicked.connect(self.listener)
 
         vbox_right = QtWidgets.QVBoxLayout()
-        vbox_right.addWidget(QtWidgets.QTextEdit())
-        vbox_right.addWidget(QtWidgets.QTextEdit())
-        vbox_right.addWidget(QtWidgets.QTextEdit())
+        self.results = []
+        # arr_results = ['first', 'second', 'third']
+        for i in range(3):
+            line = QtWidgets.QTextEdit()
+            self.results.append(line)
+            # line.setPlaceholderText('tarif: %s' % str(self.get_real_tarif()))
+            vbox_right.addWidget(line)
 
         vbox_left = QtWidgets.QVBoxLayout()
         vbox_left.addLayout(form)
@@ -392,14 +407,51 @@ class Example(QtWidgets.QWidget):
         calls = self.lines['Calls'].text().split(',')
         sms = self.lines['SMS'].text().split(',')
         inet = self.lines['Internet'].text().split(',')
-        #tarif = self.lines['Tarif'].text().split(',')
-        age_format = get_age(int(age), gender)
-
         tarif = self.get_real_tarif()
         tarif_list = [str(tarif[1]), str(tarif[2]), str(tarif[3]) if len(tarif) == 4 else '99999']
-        parse_attr(calls, sms, inet, tarif_list)
-        self.text.setText(get_dop_info() + '\n' + message)
-        message = ''
+
+        # For what
+        for i in range(3):
+            self.results[i].setText('')
+        canals = self.choose_canals()
+        i = 0
+        for canal in canals:
+            self.results[i].setText(canal)
+            if 'SMS' in canal:
+                self.add_text_to_result(get_age(int(age), gender), self.results[i])
+                self.add_text_to_result(parse_attr(calls, sms, inet, tarif_list), self.results[i])
+                self.add_text_to_result(MAIN_MIN_OFFER, self.results[i])
+            elif 'messenger' in canal:
+                a = random.randrange(2)
+                if a == 1:
+                    self.add_text_to_result(get_dop_info(), self.results[i])
+                else:
+                    self.add_text_to_result(get_age(int(age), gender), self.results[i])
+                self.add_text_to_result(parse_attr(calls, sms, inet, tarif_list), self.results[i])
+                self.add_text_to_result(MAIN_MIN_OFFER, self.results[i])
+            elif 'mobApp' in canal:
+                self.add_text_to_result(get_dop_info(), self.results[i])
+                self.add_text_to_result(MAIN_BIG_OFFER, self.results[i])
+            else:
+                self.add_text_to_result(get_dop_info(), self.results[i])
+                self.add_text_to_result(MAIN_BIG_OFFER, self.results[i])
+            i+=1
+
+    def choose_canals(self):
+        canals = []
+        if self.slider_labels['messenger'].text() > '30':
+            canals.append('Message for messenger: \n')
+        if self.slider_labels['profile'].text() > '50':
+            canals.append('Message for profile: \n')
+        if self.slider_labels['mob'].text() > '30':
+            canals.append('Message for mobApp: \n')
+        else:
+            canals.append('Message for SMS: \n')
+        return canals
+
+    def add_text_to_result(self, text, text_block):
+        text_old = text_block.toPlainText()
+        text_block.setText(text_old + text)
 
     def get_real_tarif(self):
         real_tarif_str = str(self.comboBox.itemText(self.comboBox.currentIndex()))
